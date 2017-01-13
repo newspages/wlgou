@@ -1,0 +1,2110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="zh-cn"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>翻译了下Redis的函数 - 淡定的502 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/style.css">
+<link type="text/css" rel="stylesheet" href="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/brown.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/youxu/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/youxu/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/youxu/wlwmanifest.xml">
+<script src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js" type="text/javascript" async=""></script><script src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'youxu', cb_enable_mathjax=false;</script>
+<script src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js" type="text/javascript"></script>
+<script src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_42.js" type="text/javascript" async=""></script><script src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/osd.js" type="text/javascript"></script></head>
+<body>
+<a name="top"></a>
+
+<div id="top">
+	
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/youxu/">淡定的502</a></h1>
+<p id="tagline"></p>
+</div>
+<div id="leftmenu">
+	
+		
+<h3>导航</h3>
+<ul>
+			<li><a id="MyLinks1_HomeLink" href="http://www.cnblogs.com/">博客园</a></li>
+			<li><a id="MyLinks1_MyHomeLink" href="http://www.cnblogs.com/youxu/">首页</a></li>
+			<li><a id="MyLinks1_NewPostLink" rel="nofollow" href="http://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+			<li><a id="MyLinks1_ContactLink" accesskey="9" rel="nofollow" href="http://space.cnblogs.com/msg/send/%e6%b7%a1%e5%ae%9a%e7%9a%84502">联系</a></li>
+			<li><a id="MyLinks1_Syndication" href="http://www.cnblogs.com/youxu/rss">订阅</a><a id="MyLinks1_XMLLink" href="http://www.cnblogs.com/youxu/rss"><img src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/xml.gif" alt="订阅"></a>
+			</li><li><a id="MyLinks1_Admin" rel="nofollow" href="http://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" title="日历" cellpadding="0" cellspacing="0">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar('2014/05/01');return false;">&lt;</a></td><td align="center">2014年6月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar('2014/07/01');return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" abbr="日" scope="col" align="center">日</th><th class="CalDayHeader" abbr="一" scope="col" align="center">一</th><th class="CalDayHeader" abbr="二" scope="col" align="center">二</th><th class="CalDayHeader" abbr="三" scope="col" align="center">三</th><th class="CalDayHeader" abbr="四" scope="col" align="center">四</th><th class="CalDayHeader" abbr="五" scope="col" align="center">五</th><th class="CalDayHeader" abbr="六" scope="col" align="center">六</th></tr><tr><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td></tr><tr><td class="CalWeekendDay" align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td class="CalWeekendDay" align="center">7</td></tr><tr><td class="CalWeekendDay" align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td class="CalWeekendDay" align="center">14</td></tr><tr><td class="CalWeekendDay" align="center">15</td><td align="center">16</td><td align="center">17</td><td class="CalTodayDay" align="center">18</td><td align="center">19</td><td align="center">20</td><td class="CalWeekendDay" align="center">21</td></tr><tr><td class="CalWeekendDay" align="center">22</td><td align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td class="CalWeekendDay" align="center">28</td></tr><tr><td class="CalWeekendDay" align="center">29</td><td align="center">30</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+		
+<h3>公告</h3>
+	<div id="blog-news"><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/youxu/">淡定的502</a><br>园龄：<a href="http://home.cnblogs.com/u/youxu/" title="入园时间：2011-12-05">2年6个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/youxu/followers/">0</a><br>关注：<a href="http://home.cnblogs.com/u/youxu/followees/">2</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="cnblogs.UserManager.FollowBlogger('8cbc667e-f21e-e111-b422-842b2b196315')">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+
+		
+		<h3>文章分类</h3>
+		
+				<ul>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/youxu/category/340471.html">jquery</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/youxu/category/340470.html">php</a> </li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案</h3>
+		
+				<ul>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/youxu/archive/2014/04.html">2014年4月 (1)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/youxu/archive/2013/12.html">2013年12月 (1)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/youxu/archive/2013/06.html">2013年6月 (3)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/youxu/archive/2013/05.html">2013年5月 (3)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/youxu/archive/2012/05.html">2012年5月 (1)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_5" href="http://www.cnblogs.com/youxu/archive/2012/02.html">2012年2月 (1)</a> </li>
+			
+				<li><a id="ArchiveLinks1_Categories_CatList_LinkList_1_Link_6" href="http://www.cnblogs.com/youxu/archive/2011/12.html">2011年12月 (4)</a> </li>
+			
+				</ul>
+			
+	
+
+		
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"></div>
+</div>
+
+	
+</div>
+<div id="rightmenu">
+	
+		
+<h3>统计</h3>
+	<ul>
+		<li>随笔 - 14
+		</li><li>文章 - 2
+		</li><li>评论 - 3
+		</li><li>引用 - 0
+	</li>
+</ul>
+		
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+
+		<li><a id="BlogCustomControl1_rptMainLinks_lnkLinkItem_0" href="http://www.cnblogs.com/youxu/p/">我的随笔</a></li>
+	
+		<li><a id="BlogCustomControl1_rptMainLinks_lnkLinkItem_1" href="http://www.cnblogs.com/youxu/MyComments.html">我的评论</a></li>
+	
+		<li><a id="BlogCustomControl1_rptMainLinks_lnkLinkItem_2" title="我发表过评论的随笔" href="http://www.cnblogs.com/youxu/OtherPosts.html">我的参与</a></li>
+	
+		<li><a id="BlogCustomControl1_rptMainLinks_lnkLinkItem_3" href="http://www.cnblogs.com/youxu/RecentComments.html">最新评论</a></li>
+	
+		<li><a id="BlogCustomControl1_rptMainLinks_lnkLinkItem_4" href="http://www.cnblogs.com/youxu/tag/">我的标签</a></li>
+	
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div>
+		
+<h3 class="catListTitle">留言簿</h3>
+<ul>
+	<li><a id="MyMessages1_lnkMessages" href="http://www.cnblogs.com/youxu/Contact.aspx?id=1">给我留言</a></li>
+	<!--<li><a id="MyMessages1_lnkPublicMsgView" href="http://www.cnblogs.com/youxu/default.aspx?opt=msg">查看公开留言</a></li>-->
+	<li><a id="MyMessages1_lnkPrivateMsgView" href="http://www.cnblogs.com/youxu/admin/MyMessages.aspx">查看留言</a></li>
+</ul>
+
+        
+		
+
+        
+<h3>阅读排行榜</h3>
+<div class="RecentComment">
+	<div id="TopViewPostsBlock"></div>
+</div>
+
+		
+<h3>评论排行榜</h3>
+<div class="RecentComment">
+	<div id="TopFeedbackPostsBlock"></div>
+</div>
+
+	
+</div>
+<div id="main">
+	
+
+	<div class="post">
+		<h2>
+			<a id="cb_post_title_url" href="http://www.cnblogs.com/youxu/archive/2011/12/12/2284437.html">翻译了下Redis的函数</a>
+		</h2>
+		<div id="cnblogs_post_body"><h2>Redis::__construct</h2>
+<h2>说明：</h2>
+<h2>创建一个Redis客户端</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis = new Redis();</pre>
+</div>
+<h2>connect, open</h2>
+<h2>说明：</h2>
+<h2>实例连接到一个Redis.</h2>
+<h2>参数：</h2>
+<h2><em>Host</em><em>：</em>string，可以是一个host地址，也可以是一个unix socket</h2>
+<h2><em>port</em>: int</h2>
+<h2><em>timeout</em>: float<em>&nbsp; </em><em>秒数，（可选参数，默认值为</em><em>0</em><em>代表不限制）</em><em></em></h2>
+<h2><em>返回值：</em><em></em></h2>
+<h2>BOOL 成功返回：TRUE;失败返回：FALSE<em></em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;connect('127.0.0.1', 6379);</pre>
+<pre>$redis-&gt;connect('127.0.0.1'); // port 6379 by default</pre>
+<pre>$redis-&gt;connect('127.0.0.1', 6379, 2.5); // 2.5 sec timeout.</pre>
+<pre>$redis-&gt;connect('/tmp/redis.sock'); // unix domain socket.</pre>
+</div>
+<h2>pconnect, popen</h2>
+<h2>说明：</h2>
+<h2>实例连接到一个Redis.，或者连接到一个已经通过<code>pconnect</code>/<code>popen</code><code>创建的连接上。</code></h2>
+<h2>连接直到遇到close或者php进程结束才会被关闭。</h2>
+<h2>参数：</h2>
+<h2><em>host</em>: string</h2>
+<h2><em>port</em>: int</h2>
+<h2><em>timeout</em>: float</h2>
+<h2><em>persistent_id</em>: string 持久链接的身份验证</h2>
+<h2>返回值：</h2>
+<h2>BOOL 成功返回：TRUE;失败返回：FALSE<em></em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;pconnect('127.0.0.1', 6379);</pre>
+<pre>$redis-&gt;pconnect('127.0.0.1'); // port 6379 by default - same connection like before.</pre>
+<pre>$redis-&gt;pconnect('127.0.0.1', 6379, 2.5); // 2.5 sec timeout and would be another connection than the two before.</pre>
+<pre>$redis-&gt;pconnect('127.0.0.1', 6379, 2.5, 'x'); // x is sent as persistent_id and would be another connection the the three before.</pre>
+<pre>$redis-&gt;pconnect('/tmp/redis.sock'); // unix domain socket - would be another connection than the four before.</pre>
+</div>
+<h2>close</h2>
+<h2>说明：</h2>
+<p>断开一个<strong>Redi</strong>s实例连接，除非他是通过<code>pconnect</code>&nbsp;链接的。</p>
+<h2>setOption</h2>
+<h2>说明：</h2>
+<p>创建客户端选项。</p>
+<h2>参数：</h2>
+<h2><em>Name</em></h2>
+<h2><em>Value</em></h2>
+<h2><em>返回值：</em><em></em></h2>
+<h2>BOOL 成功返回：TRUE;失败返回：FALSE<em></em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);&nbsp;&nbsp; // don't serialize data</pre>
+<pre>$redis-&gt;setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);&nbsp;&nbsp;&nbsp; // use built-in serialize/unserialize</pre>
+<pre>$redis-&gt;setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_IGBINARY);&nbsp;&nbsp; // use igBinary serialize/unserialize</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;setOption(Redis::OPT_PREFIX, 'myAppName:'); // use custom prefix on all keys</pre>
+</div>
+<h2>getOption</h2>
+<p>获得客户端选项</p>
+<p>&nbsp;</p>
+<h2>参数：</h2>
+<h2><em>Name</em></h2>
+<h2>返回值：</h2>
+<h2><em>Value</em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;getOption(Redis::OPT_SERIALIZER);&nbsp;&nbsp; // return Redis::SERIALIZER_NONE, Redis::SERIALIZER_PHP, or Redis::SERIALIZER_IGBINARY.</pre>
+</div>
+<h2>ping</h2>
+<h2>说明：</h2>
+<p>检查当前的连接状态。</p>
+<h2>参数：</h2>
+<p>无</p>
+<h2>返回值：</h2>
+<p><em>STRING</em><em>：</em>PONG 失败则会返回一个Redis抛出的连接异常。</p>
+<h2>get</h2>
+<h2>说明：</h2>
+<p>获得一个指定的key的值。</p>
+<h2>参数：</h2>
+<p>Key</p>
+<h2>返回值：</h2>
+<p><em>String</em>&nbsp;or&nbsp;<em>Bool</em>: 如果值存在则返回值，否则返回false。</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;get('key');</pre>
+</div>
+<h2>set</h2>
+<h2>说明：</h2>
+<p>创建一个值</p>
+<h2>参数：</h2>
+<p><em>Key</em><br> <em>Value</em></p>
+<p><em>Timeout</em>&nbsp;（可选）<code>可以在一定的</code><code>timeout</code><code>时间内让</code><code>SETEX</code>&nbsp;优先调用。</p>
+<h2>返回值：</h2>
+<p>成功返回true</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'value');</pre>
+</div>
+<h2>setex</h2>
+<h2>说明：</h2>
+<p>创建一个有一定存活时间的值</p>
+<h2>参数：</h2>
+<p><em>Key</em>&nbsp;<em>TTL</em>&nbsp;<em>Value</em></p>
+<h2>返回值：</h2>
+<p>成功返回true</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;setex('key', 3600, 'value'); // sets key → value, with 1h TTL.</pre>
+</div>
+<h2>setnx</h2>
+<p>如果key的值不存在，则创建key的值为value</p>
+<h2>参数：</h2>
+<p><em>Key</em>&nbsp;<em></em></p>
+<p><em>Value</em></p>
+<h2>返回值：</h2>
+<p>成功返回true 失败返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;setnx('key', 'value'); /* return TRUE */</pre>
+<pre>$redis-&gt;setnx('key', 'value'); /* return FALSE */</pre>
+</div>
+<h2>del, delete</h2>
+<h2>说明：</h2>
+<h2>删除一个指定的key的值</h2>
+<h2>参数：</h2>
+<h2>可以是一个数组，也可以是一个多个字符串。</h2>
+<h2>返回值：</h2>
+<p>成功删除的个数</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key1', 'val1');</pre>
+<pre>$redis-&gt;set('key2', 'val2');</pre>
+<pre>$redis-&gt;set('key3', 'val3');</pre>
+<pre>$redis-&gt;set('key4', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;delete('key1', 'key2'); /* return 2 */</pre>
+<pre>$redis-&gt;delete(array('key3', 'key4')); /* return 2 */</pre>
+</div>
+<h2>multi, exec, discard.</h2>
+<h2>说明：</h2>
+<p>进入或者退出事务模式</p>
+<h2>参数：</h2>
+<p><strong>(</strong><strong>可选)</strong></p>
+<p>Redis::MULTI或Redis::PIPELINE. 默认是 Redis::MULTI</p>
+<p>Redis::MULTI：将多个操作当成一个事务执行<br> Redis::PIPELINE:让（多条）执行命令简单的，更加快速的发送给服务器，但是没有任何原子性的保证<br> discard:删除一个事务</p>
+<h2>返回值：</h2>
+<p>multi()，返回一个redis对象，并进入multi-mode模式，一旦进入multi-mode模式，以后调用的所有方法都会返回相同的对象，只到exec(）方法被调用。</p>
+<h2>范例：</h2>
+<div>
+<pre>$ret = $redis-&gt;multi()</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;set('key1', 'val1')</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;get('key1')</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;set('key2', 'val2')</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;get('key2')</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;exec();</pre>
+<pre>&nbsp;</pre>
+<pre>/*</pre>
+<pre>$ret == array(</pre>
+<pre>&nbsp;&nbsp;&nbsp; 0 =&gt; TRUE,</pre>
+<pre>&nbsp;&nbsp;&nbsp; 1 =&gt; 'val1',</pre>
+<pre>&nbsp;&nbsp;&nbsp; 2 =&gt; TRUE,</pre>
+<pre>&nbsp;&nbsp;&nbsp; 3 =&gt; 'val2');</pre>
+<pre>*/</pre>
+</div>
+<h2>watch, unwatch</h2>
+<h2>说明：</h2>
+<p>监测一个key的值是否被其它的程序更改。如果这个key在watch 和 exec （方法）间被修改，这个 MULTI/EXEC 事务的执行将失败（return false）<br> unwatch&nbsp; 取消被这个程序监测的所有key</p>
+<h2>参数：</h2>
+<p><em>Keys</em><em>:</em>一对key的列表</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;watch('x');</pre>
+<pre>/* long code here during the execution of which other clients could well modify `x` */</pre>
+<pre>$ret = $redis-&gt;multi()</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;incr('x')</pre>
+<pre>&nbsp;&nbsp;&nbsp; -&gt;exec();</pre>
+<pre>/*</pre>
+<pre>$ret = FALSE if x has been modified between the call to WATCH and the call to EXEC.</pre>
+<pre>*/</pre>
+</div>
+<h2>subscribe</h2>
+<h2>说明：</h2>
+<p>方法回调。注意，该方法可能在未来里发生改变</p>
+<h2>参数：</h2>
+<p><em>channels</em>: array</p>
+<p><em>callback</em>:&nbsp;回调函数名</p>
+<h2>范例：</h2>
+<div>
+<pre>function f($redis, $chan, $msg) {</pre>
+<pre>&nbsp; &nbsp;&nbsp;switch($chan) {</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; case 'chan-1':</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;</pre>
+<pre>&nbsp;</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; case 'chan-2':</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;</pre>
+<pre>&nbsp;</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; case 'chan-2':</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;</pre>
+<pre>&nbsp;&nbsp;&nbsp; }</pre>
+<pre>}</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;subscribe(array('chan-1', 'chan-2', 'chan-3'), 'f'); // subscribe to 3 chans</pre>
+</div>
+<h2>Publish</h2>
+<h2>说明：</h2>
+<p>发表内容到某一个通道。注意，该方法可能在未来里发生改变</p>
+<h2>参数：</h2>
+<p><em>Channel</em><em>：</em><em></em></p>
+<p><em>Messsage</em><em>：</em>string<em></em></p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;publish('chan-1', 'hello, world!'); // send message.</pre>
+</div>
+<h2>exists</h2>
+<h2>说明：</h2>
+<h2>验证指定的值是否存在</h2>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<h2>返回值：</h2>
+<p>成功返回true 失败返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'value');</pre>
+<pre>$redis-&gt;exists('key'); /*&nbsp; TRUE */</pre>
+<pre>$redis-&gt;exists('NonExistingKey'); /* FALSE */</pre>
+</div>
+<h2>incr, incrBy</h2>
+<h2>说明：</h2>
+<p>key中的值进行自增.如果第二个参数存在，它将被用来作为整数值递增</p>
+<h2>参数：</h2>
+<p>Key</p>
+<p>Value</p>
+<h2>返回值：</h2>
+<h2>返回新value</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;incr('key1'); /* key1 didn't exists, set to 0 before the increment */</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* and now has the value 1&nbsp; */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;incr('key1'); /* 2 */</pre>
+<pre>$redis-&gt;incr('key1'); /* 3 */</pre>
+<pre>$redis-&gt;incr('key1'); /* 4 */</pre>
+<pre>$redis-&gt;incrBy('key1', 10); /* 14 */</pre>
+</div>
+<h2>decr, decrBy</h2>
+<h2>说明：</h2>
+<h2>删掉key中的值，用法同incr</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;decr('key1'); /* key1 didn't exists, set to 0 before the increment */</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* and now has the value -1&nbsp; */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;decr('key1'); /* -2 */</pre>
+<pre>$redis-&gt;decr('key1'); /* -3 */</pre>
+<pre>$redis-&gt;decrBy('key1', 10); /* -13 */</pre>
+</div>
+<h2>getMultiple</h2>
+<h2>说明：</h2>
+<h2>返回一组数据的值，如果这个数组中的key值不存在，则返回false</h2>
+<h2>参数：</h2>
+<p>Array</p>
+<h2>返回值：</h2>
+<p>Array</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key1', 'value1');</pre>
+<pre>$redis-&gt;set('key2', 'value2');</pre>
+<pre>$redis-&gt;set('key3', 'value3');</pre>
+<pre>$redis-&gt;getMultiple(array('key1', 'key2', 'key3')); /* array('value1', 'value2', 'value3');</pre>
+<pre>$redis-&gt;getMultiple(array('key0', 'key1', 'key5')); /* array(`FALSE`, 'value2', `FALSE`);</pre>
+</div>
+<h2>lPush</h2>
+<h2>说明：</h2>
+<p>在名称为key的list左边（头）添加一个值为value的&nbsp;元素，如果这个key值不存在则创建一个。如果key值存在并且不是一个list，则返回false</p>
+<h2>参数：</h2>
+<p>Key</p>
+<h2>Value</h2>
+<h2><br> 返回值：</h2>
+<p>返回key值得长度。</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;lPush('key1', 'C'); // returns 1</pre>
+<pre>$redis-&gt;lPush('key1', 'B'); // returns 2</pre>
+<pre>$redis-&gt;lPush('key1', 'A'); // returns 3</pre>
+<pre>/* key1 now points to the following list: [ 'A', 'B', 'C' ] */</pre>
+</div>
+<h2>rPush</h2>
+<h2>说明：</h2>
+<p>在名称为key的list右边（尾）添加一个值为value的&nbsp;元素，如果这个key值不存在则创建一个。如果key值存在并且不是一个list，则返回false</p>
+<h2>参数：</h2>
+<p>Key</p>
+<p>Value</p>
+<h2>返回值：</h2>
+<p>&nbsp;</p>
+<p>返回key值得长度。</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;rPush('key1', 'A'); // returns 1</pre>
+<pre>$redis-&gt;rPush('key1', 'B'); // returns 2</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); // returns 3</pre>
+<pre>/* key1 now points to the following list: [ 'A', 'B', 'C' ] */</pre>
+</div>
+<h2>lPushx</h2>
+<h2>说明：</h2>
+<p>在名称为key的list左边（头）添加一个值为value的&nbsp;元素，如果这个value存在则不添加。</p>
+<h2>参数：</h2>
+<p>Key</p>
+<p>Value</p>
+<h2>返回值：</h2>
+<p>返回key值得长度。</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;lPushx('key1', 'A'); // returns 0</pre>
+<pre>$redis-&gt;lPush('key1', 'A'); // returns 1</pre>
+<pre>$redis-&gt;lPushx('key1', 'B'); // returns 2</pre>
+<pre>$redis-&gt;lPushx('key1', 'C'); // returns 3</pre>
+<pre>/* key1 now points to the following list: [ 'A', 'B', 'C' ] */</pre>
+</div>
+<h2>rPushx</h2>
+<h2>说明：</h2>
+<p>在名称为key的list右边（尾）添加一个值为value的&nbsp;元素，如果这个value存在则不添加。</p>
+<h2>参数：</h2>
+<p>Key</p>
+<p>Value</p>
+<h2>返回值：</h2>
+<p>返回key值得长度。</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;rPushx('key1', 'A'); // returns 0</pre>
+<pre>$redis-&gt;rPush('key1', 'A'); // returns 1</pre>
+<pre>$redis-&gt;rPushx('key1', 'B'); // returns 2</pre>
+<pre>$redis-&gt;rPushx('key1', 'C'); // returns 3</pre>
+<pre>/* key1 now points to the following list: [ 'A', 'B', 'C' ] */</pre>
+</div>
+<h2>lPop</h2>
+<h2>说明：</h2>
+<p>输出名称为key的list左(头)起起的第一个元素，删除该元素</p>
+<h2>参数：</h2>
+<p>Key</p>
+<h2>返回值：</h2>
+<h2>失败返回false</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); /* key1 =&gt; [ 'A', 'B', 'C' ] */</pre>
+<pre>$redis-&gt;lPop('key1'); /* key1 =&gt; [ 'B', 'C' ] */</pre>
+</div>
+<h2>rPop</h2>
+<h2>说明：</h2>
+<p>输出名称为key的list右(尾)起起的第一个元素，删除该元素</p>
+<h2>参数：</h2>
+<p>Key</p>
+<h2>返回值：</h2>
+<h2>失败返回false</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); /* key1 =&gt; [ 'A', 'B', 'C' ] */</pre>
+<pre>$redis-&gt;rPop('key1'); /* key1 =&gt; [ 'A', 'B' ] */</pre>
+</div>
+<h2>blPop, brPop</h2>
+<h2>说明：</h2>
+<h2>lpop命令的block版本。即当timeout为0时，若遇到名称为key&nbsp;的list不存在或该list为空，则命令结束。如果timeout&gt;0，则遇到上述情况时，等待timeout秒，如果问题没有解决，则对key<em>+1</em>开始的list执行pop操作</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>Timeout</h2>
+<h2>返回值：</h2>
+<h2>Array array('listName', 'element')</h2>
+<h2>范例：</h2>
+<div>
+<pre>/* Non blocking feature */</pre>
+<pre>$redis-&gt;lPush('key1', 'A');</pre>
+<pre>$redis-&gt;delete('key2');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;blPop('key1', 'key2', 10); /* array('key1', 'A') */</pre>
+<pre>/* OR */</pre>
+<pre>$redis-&gt;blPop(array('key1', 'key2'), 10); /* array('key1', 'A') */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;brPop('key1', 'key2', 10); /* array('key1', 'A') */</pre>
+<pre>/* OR */</pre>
+<pre>$redis-&gt;brPop(array('key1', 'key2'), 10); /* array('key1', 'A') */</pre>
+<pre>&nbsp;</pre>
+<pre>/* Blocking feature */</pre>
+<pre>&nbsp;</pre>
+<pre>/* process 1 */</pre>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;blPop('key1', 10);</pre>
+<pre>/* blocking for 10 seconds */</pre>
+<pre>&nbsp;</pre>
+<pre>/* process 2 */</pre>
+<pre>$redis-&gt;lPush('key1', 'A');</pre>
+<pre>&nbsp;</pre>
+<pre>/* process 1 */</pre>
+<pre>/* array('key1', 'A') is returned*/</pre>
+</div>
+<h2>lSize</h2>
+<h2>说明：</h2>
+<h2>返回这个key值list的个数，如果这个list不存在或为空，则返回0，如果这个值得类型并不是一个list则返回false。</h2>
+<h2>参数：</h2>
+<p>Key</p>
+<h2>返回值：</h2>
+<p>Long or bool</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); /* key1 =&gt; [ 'A', 'B', 'C' ] */</pre>
+<pre>$redis-&gt;lSize('key1');/* 3 */</pre>
+<pre>$redis-&gt;rPop('key1'); </pre>
+<pre>$redis-&gt;lSize('key1');/* 2 */</pre>
+</div>
+<h2>lIndex, lGet</h2>
+<h2>说明：</h2>
+<p>返回名称为key的list中index位置的元素，0代表第一个，1代表第二个，-1代表最后一个，-2代表倒数第二个，当这个key值不存在于list中时，返回false。</p>
+<h2>参数：</h2>
+<p><em>key</em><em>&nbsp;</em><em>index</em></p>
+<h2>返回值：</h2>
+<p><em>String or false</em></p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); /* key1 =&gt; [ 'A', 'B', 'C' ] */</pre>
+<pre>$redis-&gt;lGet('key1', 0); /* 'A' */</pre>
+<pre>$redis-&gt;lGet('key1', -1); /* 'C' */</pre>
+<pre>$redis-&gt;lGet('key1', 10); /* `FALSE` */</pre>
+</div>
+<h2>lSet</h2>
+<h2>说明：</h2>
+<p>设置名称为key的list中index位置的元素赋值为value</p>
+<h2><br> 参数：</h2>
+<p><em>Key</em></p>
+<p><em>Index</em></p>
+<p><em>Value</em></p>
+<p><em>&nbsp;</em></p>
+<h2>返回值：</h2>
+<p><em>Bool </em><em>成功返回true </em><em>失败返回false</em></p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C'); /* key1 =&gt; [ 'A', 'B', 'C' ] */</pre>
+<pre>$redis-&gt;lGet('key1', 0); /* 'A' */</pre>
+<pre>$redis-&gt;lSet('key1', 0, 'X');</pre>
+<pre>$redis-&gt;lGet('key1', 0); /* 'X' */ </pre>
+</div>
+<h2>lRange, lGetRange</h2>
+<h2>说明：</h2>
+<p>返回名称为key的list中start至end之间的元素（end为 -1 ，返回所有）</p>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<p><em>Start</em></p>
+<h2><em>End<br> </em>返回值：</h2>
+<p>Array</p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C');</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'B', 'C') */</pre>
+</div>
+<h2>lTrim, listTrim</h2>
+<h2>说明：</h2>
+<p>截取名称为key的list，保留start至end之间的元素</p>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<p><em>Start</em></p>
+<p><em>Stop</em></p>
+<h2>返回值：</h2>
+<p><em>Array</em></p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;rPush('key1', 'A');</pre>
+<pre>$redis-&gt;rPush('key1', 'B');</pre>
+<pre>$redis-&gt;rPush('key1', 'C');</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'B', 'C') */</pre>
+<pre>$redis-&gt;lTrim('key1', 0, 1);</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'B') */</pre>
+</div>
+<h2>lRem, lRemove</h2>
+<h2>说明：</h2>
+<p>从列表中从头部开始移除count个匹配的值。如果count为零，所有匹配的元素都被删除。如果count是负数，内容从尾部开始删除。</p>
+<h2>参数：</h2>
+<p><em>key</em><em><br> </em><em>value</em><em><br> </em><em>count</em></p>
+<h2>返回值：</h2>
+<p><em>LONG</em>&nbsp; or bool</p>
+<h2>范例：<em></em></h2>
+<p>&nbsp;</p>
+<div>
+<pre>$redis-&gt;lPush('key1', 'A');</pre>
+<pre>$redis-&gt;lPush('key1', 'B');</pre>
+<pre>$redis-&gt;lPush('key1', 'C'); </pre>
+<pre>$redis-&gt;lPush('key1', 'A'); </pre>
+<pre>$redis-&gt;lPush('key1', 'A'); </pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'A', 'C', 'B', 'A') */</pre>
+<pre>$redis-&gt;lRem('key1', 'A', 2); /* 2 */</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('C', 'B', 'A') */</pre>
+</div>
+<p><em>&nbsp;</em></p>
+<h2>lInsert</h2>
+<h2>说明：</h2>
+<p>在名称为key的list中，找到值为<em>pivot</em>&nbsp;的value，并根据参数Redis::BEFORE | Redis::AFTER，来确定，newvalue 是放在 pivot 的前面，或者后面。如果key不存在，不会插入，如果 pivot不存在，return -1</p>
+<h2>参数：</h2>
+<p><em>key</em>&nbsp;<em>position</em>&nbsp;Redis::BEFORE | Redis::AFTER&nbsp;<em>pivot</em>&nbsp;<em>value</em></p>
+<h2>返回值：</h2>
+<p><em>返回这个list</em><em>的长度</em></p>
+<p><em>如果</em>pivot 不存在 返回-1</p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;delete('key1');</pre>
+<pre>$redis-&gt;lInsert('key1', Redis::AFTER, 'A', 'X'); /* 0 */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lPush('key1', 'A');</pre>
+<pre>$redis-&gt;lPush('key1', 'B');</pre>
+<pre>$redis-&gt;lPush('key1', 'C');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lInsert('key1', Redis::BEFORE, 'C', 'X'); /* 4 */</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'B', 'X', 'C') */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lInsert('key1', Redis::AFTER, 'C', 'Y'); /* 5 */</pre>
+<pre>$redis-&gt;lRange('key1', 0, -1); /* array('A', 'B', 'X', 'C', 'Y') */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lInsert('key1', Redis::AFTER, 'W', 'value'); /* -1 */</pre>
+</div>
+<h2>sAdd</h2>
+<h2>说明：</h2>
+<p>向名称为key的set中添加元素value,如果value存在，不写入，return false</p>
+<h2>参数：</h2>
+<p><em>key</em>&nbsp;</p>
+<p><em>value</em></p>
+<h2>返回值：</h2>
+<p>Bool 成功返回true 失败或已存在value值则返回false</p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); /* TRUE, 'key1' =&gt; {'set1'} */</pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); /* TRUE, 'key1' =&gt; {'set1', 'set2'}*/</pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); /* FALSE, 'key1' =&gt; {'set1', 'set2'}*/</pre>
+</div>
+<h2>sRem, sRemove</h2>
+<p>删除名称为key的set中的元素value</p>
+<h2>参数：</h2>
+<p><em>key</em>&nbsp;</p>
+<p><em>member</em></p>
+<h2>返回值：</h2>
+<p>Bool</p>
+<h2>范例：<em></em></h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set3'); /* 'key1' =&gt; {'set1', 'set2', 'set3'}*/</pre>
+<pre>$redis-&gt;sRem('key1', 'set2'); /* 'key1' =&gt; {'set1', 'set3'} */</pre>
+</div>
+<h2>sMove</h2>
+<h2>说明：</h2>
+<p>将value元素从名称为srckey的集合移到名称为dstkey的集合</p>
+<p>&nbsp;</p>
+<h2>参数：</h2>
+<p><em>srcKey</em>&nbsp;</p>
+<p><em>dstKey</em>&nbsp;</p>
+<p><em>member</em></p>
+<h2>返回值：</h2>
+<p>Bool 成功返回true 失败返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set11'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set12'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set13'); /* 'key1' =&gt; {'set11', 'set12', 'set13'}*/</pre>
+<pre>$redis-&gt;sAdd('key2' , 'set21'); </pre>
+<pre>$redis-&gt;sAdd('key2' , 'set22'); /* 'key2' =&gt; {'set21', 'set22'}*/</pre>
+<pre>$redis-&gt;sMove('key1', 'key2', 'set13'); /* 'key1' =&gt;&nbsp; {'set11', 'set12'} */</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* 'key2' =&gt;&nbsp; {'set21', 'set22', 'set13'} */</pre>
+</div>
+<h2>sIsMember, sContains</h2>
+<h2>说明：</h2>
+<p>名称为key的集合中查找是否有value元素</p>
+<h2>参数：</h2>
+<p><em>key</em>&nbsp;</p>
+<p><em>value</em></p>
+<h2>返回值：</h2>
+<p>Bool 存在返回true 不存在返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set3'); /* 'key1' =&gt; {'set1', 'set2', 'set3'}*/</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sIsMember('key1', 'set1'); /* TRUE */</pre>
+<pre>$redis-&gt;sIsMember('key1', 'setX'); /* FALSE */</pre>
+</div>
+<h2>sCard, sSize</h2>
+<h2>说明：</h2>
+<p>返回名称为key的set的元素个数</p>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<h2>返回值：</h2>
+<p>Long 元素个数，不存在则返回0</p>
+<h2>范例：</h2>
+<p>&nbsp;</p>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set3'); /* 'key1' =&gt; {'set1', 'set2', 'set3'}*/</pre>
+<pre>$redis-&gt;sCard('key1'); /* 3 */</pre>
+<pre>$redis-&gt;sCard('keyX'); /* 0 */</pre>
+</div>
+<h2>sPop</h2>
+<h2>说明：</h2>
+<p>随机返回并删除名称为key的set中一个元素</p>
+<h2>参数：</h2>
+<p><em>key</em></p>
+<h2>返回值：</h2>
+<p>返回被随机取得的值，如果失败返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set3'); /* 'key1' =&gt; {'set3', 'set1', 'set2'}*/</pre>
+<pre>$redis-&gt;sPop('key1'); /* 'set1', 'key1' =&gt; {'set3', 'set2'} */</pre>
+<pre>$redis-&gt;sPop('key1'); /* 'set3', 'key1' =&gt; {'set2'} */</pre>
+</div>
+<h2>sRandMember</h2>
+<h2>说明：</h2>
+<p>随机返回名称为key的set中一个元素</p>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<h2>返回值：</h2>
+<p>返回的value的值，失败返回false</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1' , 'set1'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set2'); </pre>
+<pre>$redis-&gt;sAdd('key1' , 'set3'); /* 'key1' =&gt; {'set3', 'set1', 'set2'}*/</pre>
+<pre>$redis-&gt;sRandMember('key1'); /* 'set1', 'key1' =&gt; {'set3', 'set1', 'set2'} */</pre>
+<pre>$redis-&gt;sRandMember('key1'); /* 'set3', 'key1' =&gt; {'set3', 'set1', 'set2'} */</pre>
+</div>
+<h2>sInter</h2>
+<h2>说明：</h2>
+<p>求交集</p>
+<h2>参数：</h2>
+<p>Key1，key2….keyN</p>
+<h2>返回值：</h2>
+<p>Array 返回交集的数组，如果交集为空，则返回一个空数组</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1', 'val1');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val2');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('key2', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key2', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('key3', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key3', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sInter('key1', 'key2', 'key3'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>array(2) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(4) "val4"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(4) "val3"</pre>
+<pre>}</pre>
+</div>
+<h2>sInterStore</h2>
+<h2>说明：</h2>
+<p>执行sInter命令并把结果储存到新建的变量中。</p>
+<h2>参数：</h2>
+<p><em>Key</em></p>
+<p><em>Key2:key1,key2…keyN</em></p>
+<p><em>&nbsp;</em></p>
+<h2>返回值：</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;sAdd('key1', 'val1');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val2');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key1', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('key2', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key2', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('key3', 'val3');</pre>
+<pre>$redis-&gt;sAdd('key3', 'val4');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sInterStore('output', 'key1', 'key2', 'key3'));</pre>
+<pre>var_dump($redis-&gt;sMembers('output'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>int(2)</pre>
+<pre>&nbsp;</pre>
+<pre>array(2) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(4) "val4"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(4) "val3"</pre>
+<pre>}</pre>
+</div>
+<h2>sUnion</h2>
+<h2>说明：</h2>
+<p>合并多个key值</p>
+<h2>参数：</h2>
+<p><em>Keys</em><em>：</em><em>key1</em><em>，</em><em>key2…..keyN</em></p>
+<h2>返回值：</h2>
+<p>这些key生成的合集</p>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s0', 's1', 's2');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s0', '1');</pre>
+<pre>$redis-&gt;sAdd('s0', '2');</pre>
+<pre>$redis-&gt;sAdd('s1', '3');</pre>
+<pre>$redis-&gt;sAdd('s1', '1');</pre>
+<pre>$redis-&gt;sAdd('s2', '3');</pre>
+<pre>$redis-&gt;sAdd('s2', '4');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sUnion('s0', 's1', 's2'));</pre>
+</div>
+<p>Return value: all elements that are either in s0 or in s1 or in s2.</p>
+<div>
+<pre>array(4) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "3"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "4"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(1) "1"</pre>
+<pre>&nbsp; [3]=&gt;</pre>
+<pre>&nbsp; string(1) "2"</pre>
+<pre>}</pre>
+</div>
+<h2>sUnionStore</h2>
+<h2>说明：</h2>
+<h2>执行sUnion命令并把结果储存到新建的变量中。</h2>
+<h2>参数：</h2>
+<h2><em>Key</em>:</h2>
+<h2><em>Keys</em>:&nbsp;</h2>
+<h2>返回值：</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s0', 's1', 's2');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s0', '1');</pre>
+<pre>$redis-&gt;sAdd('s0', '2');</pre>
+<pre>$redis-&gt;sAdd('s1', '3');</pre>
+<pre>$redis-&gt;sAdd('s1', '1');</pre>
+<pre>$redis-&gt;sAdd('s2', '3');</pre>
+<pre>$redis-&gt;sAdd('s2', '4');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sUnionStore('dst', 's0', 's1', 's2'));</pre>
+<pre>var_dump($redis-&gt;sMembers('dst'));</pre>
+</div>
+<p>Return value: the number of elements that are either in s0 or in s1 or in s2.</p>
+<div>
+<pre>int(4)</pre>
+<pre>array(4) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "3"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "4"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(1) "1"</pre>
+<pre>&nbsp; [3]=&gt;</pre>
+<pre>&nbsp; string(1) "2"</pre>
+<pre>}</pre>
+</div>
+<h2>sDiff</h2>
+<h2>说明：</h2>
+<h2>求差集</h2>
+<h2>参数：</h2>
+<h2><em>Keys</em><em></em></h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s0', 's1', 's2');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s0', '1');</pre>
+<pre>$redis-&gt;sAdd('s0', '2');</pre>
+<pre>$redis-&gt;sAdd('s0', '3');</pre>
+<pre>$redis-&gt;sAdd('s0', '4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s1', '1');</pre>
+<pre>$redis-&gt;sAdd('s2', '3');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sDiff('s0', 's1', 's2'));</pre>
+</div>
+<p>Return value: all elements of s0 that are neither in s1 nor in s2.</p>
+<div>
+<pre>array(2) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "4"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "2"</pre>
+<pre>}</pre>
+</div>
+<h2>sDiffStore</h2>
+<h2>说明：</h2>
+<h2>求差集并把结果储存到新建的变量中。</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>Keys</h2>
+<h2>返回值：</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s0', 's1', 's2');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s0', '1');</pre>
+<pre>$redis-&gt;sAdd('s0', '2');</pre>
+<pre>$redis-&gt;sAdd('s0', '3');</pre>
+<pre>$redis-&gt;sAdd('s0', '4');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;sAdd('s1', '1');</pre>
+<pre>$redis-&gt;sAdd('s2', '3');</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sDiffStore('dst', 's0', 's1', 's2'));</pre>
+<pre>var_dump($redis-&gt;sMembers('dst'));</pre>
+</div>
+<p>Return value: the number of elements of s0 that are neither in s1 nor in s2.</p>
+<div>
+<pre>int(2)</pre>
+<pre>array(2) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "4"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "2"</pre>
+<pre>}</pre>
+</div>
+<h2>sMembers, sGetMembers</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的set的所有元素</h2>
+<h2>参数：</h2>
+<h2><em>Key</em><em></em></h2>
+<h2>返回值：</h2>
+<h2>array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s');</pre>
+<pre>$redis-&gt;sAdd('s', 'a');</pre>
+<pre>$redis-&gt;sAdd('s', 'b');</pre>
+<pre>$redis-&gt;sAdd('s', 'a');</pre>
+<pre>$redis-&gt;sAdd('s', 'c');</pre>
+<pre>var_dump($redis-&gt;sMembers('s'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>array(3) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "c"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "a"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(1) "b"</pre>
+<pre>}</pre>
+</div>
+<h2>getSet</h2>
+<h2>说明：</h2>
+<h2>返回原来key中的值，并将value写入key</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>Value</h2>
+<h2>返回值：</h2>
+<h2>这个key的前一个值</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('x', '42');</pre>
+<pre>$exValue = $redis-&gt;getSet('x', 'lol');&nbsp; // return '42', replaces x by 'lol'</pre>
+<pre>$newValue = $redis-&gt;get('x')'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // return 'lol'</pre>
+</div>
+<h2>randomKey</h2>
+<h2>说明：</h2>
+<h2>随机返回key空间的一个key</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>在redis中随机存在的一个key</h2>
+<h2>范例：</h2>
+<div>
+<pre>$key = $redis-&gt;randomKey();</pre>
+<pre>$surprise = $redis-&gt;get($key);&nbsp; // who knows what's in there.</pre>
+</div>
+<h2>select</h2>
+<h2>说明：</h2>
+<h2>选择一个数据库</h2>
+<h2>参数：</h2>
+<h2>Dbindex</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;select(0);&nbsp; // switch to DB 0</pre>
+<pre>$redis-&gt;set('x', '42'); // write 42 to x</pre>
+<pre>$redis-&gt;move('x', 1);&nbsp;&nbsp; // move to DB 1</pre>
+<pre>$redis-&gt;select(1);&nbsp; // switch to DB 1</pre>
+<pre>$redis-&gt;get('x');&nbsp;&nbsp; // will return 42</pre>
+</div>
+<h2>move</h2>
+<h2>说明：</h2>
+<h2>转移一个key到另外一个数据库</h2>
+<h2>参数：</h2>
+<h2><em>Key</em><em> </em><em></em></h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;select(0);&nbsp; // switch to DB 0</pre>
+<pre>$redis-&gt;set('x', '42'); // write 42 to x</pre>
+<pre>$redis-&gt;move('x', 1);&nbsp;&nbsp; // move to DB 1</pre>
+<pre>$redis-&gt;select(1);&nbsp; // switch to DB 1</pre>
+<pre>$redis-&gt;get('x');&nbsp;&nbsp; // will return 42</pre>
+</div>
+<h2>rename, renameKey</h2>
+<h2>说明：</h2>
+<h2>重命名key</h2>
+<h2>参数：</h2>
+<h2>Srckey</h2>
+<h2>dstkey</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('x', '42');</pre>
+<pre>$redis-&gt;rename('x', 'y');</pre>
+<pre>$redis-&gt;get('y'); &nbsp;&nbsp;// → 42</pre>
+<pre>$redis-&gt;get('x');&nbsp;&nbsp; // → `FALSE`</pre>
+</div>
+<h2>renameNx</h2>
+<p>与remane类似，但是，如果重新命名的名字已经存在，不会替换成功</p>
+<h2>setTimeout, expire</h2>
+<h2>说明：</h2>
+<h2>设定一个key的活动时间（s）</h2>
+<h2>参数：</h2>
+<h2><em>Key</em><em> </em><em></em></h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('x', '42');</pre>
+<pre>$redis-&gt;setTimeout('x', 3); // x will disappear in 3 seconds.</pre>
+<pre>sleep(5);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;// wait 5 seconds</pre>
+<pre>$redis-&gt;get('x');&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // will return `FALSE`, as 'x' has expired.</pre>
+</div>
+<h2>expireAt</h2>
+<h2>说明：</h2>
+<h2>key存活到一个unix时间戳时间</h2>
+<h2>参数：</h2>
+<h2><em>Key</em></h2>
+<h2>Unix timestamp</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('x', '42');</pre>
+<pre>$now = time(NULL); // current timestamp</pre>
+<pre>$redis-&gt;expireAt('x', $now + 3);&nbsp;&nbsp;&nbsp; // x will disappear in 3 seconds.</pre>
+<pre>sleep(5);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // wait 5 seconds</pre>
+<pre>$redis-&gt;get('x');&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // will return `FALSE`, as 'x' has expired.</pre>
+</div>
+<h2>keys, getKeys</h2>
+<h2>说明：</h2>
+<h2>返回满足给定pattern的所有key</h2>
+<h2>参数：</h2>
+<h2>Pattern (可带*)</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$allKeys = $redis-&gt;keys('*');&nbsp;&nbsp; // all keys will match this.</pre>
+<pre>$keyWithUserPrefix = $redis-&gt;keys('user*');</pre>
+</div>
+<h2>dbSize</h2>
+<h2>说明：</h2>
+<h2>查看现在数据库有多少key</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>DB size,</h2>
+<h2>范例：</h2>
+<div>
+<pre>$count = $redis-&gt;dbSize();</pre>
+<pre>echo "Redis has $count keys\n";</pre>
+</div>
+<h2>auth</h2>
+<h2>说明：</h2>
+<h2>密码验证</h2>
+<h2>参数：</h2>
+<h2>password</h2>
+<h2>返回值：</h2>
+<h2>BOOL</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;auth('foobared');</pre>
+</div>
+<h2>bgrewriteaof</h2>
+<h2>说明：</h2>
+<h2>使用aof来进行数据库持久化</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;bgrewriteaof();</pre>
+</div>
+<h2>slaveof</h2>
+<h2>说明：</h2>
+<h2>选择从服务器</h2>
+<h2>参数：</h2>
+<h2>host (string) and port</h2>
+<h2>返回值：</h2>
+<h2>BOOL</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;slaveof('10.0.1.7', 6379);</pre>
+<pre>/* ... */</pre>
+<pre>$redis-&gt;slaveof();</pre>
+</div>
+<h2>object</h2>
+<h2>说明：</h2>
+<h2>获得key对象的详细内容</h2>
+<h2>参数：</h2>
+<ul>
+<li>"encoding"</li>
+<li>"refcount"</li>
+<li>"idletime"<strong> </strong></li>
+</ul>
+<h2>返回值：</h2>
+<h2>STRING for "encoding",</h2>
+<h2>LONG for "refcount" and "idletime",</h2>
+<h2>FALSE if the key doesn't exist.</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;object("encoding", "l"); // → ziplist</pre>
+<pre>$redis-&gt;object("refcount", "l"); // → 1</pre>
+<pre>$redis-&gt;object("idletime", "l"); // → 400 (in seconds, with a precision of 10 seconds).</pre>
+</div>
+<h2>save</h2>
+<h2>说明：</h2>
+<h2>将数据同步保存到磁盘</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;save();</pre>
+</div>
+<h2>bgsave</h2>
+<h2>说明：</h2>
+<h2>将数据异步保存到磁盘</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;bgSave();</pre>
+</div>
+<h2>lastSave</h2>
+<h2>说明：</h2>
+<h2>返回上次成功将数据保存到磁盘的Unix时间戳</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>timestamp</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;lastSave();</pre>
+</div>
+<h2>type</h2>
+<h2>说明：</h2>
+<h2>返回key的类型值</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>返回值：</h2>
+<h2>根据指定的类型返回</h2>
+<h2>string: Redis::REDIS_STRING</h2>
+<h2>set: Redis::REDIS_SET</h2>
+<h2>list: Redis::REDIS_LIST</h2>
+<h2>zset: Redis::REDIS_ZSET</h2>
+<h2>hash: Redis::REDIS_HASH</h2>
+<h2>other: Redis::REDIS_NOT_FOUND</h2>
+<h2>&nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;type('key');</pre>
+</div>
+<h2>append</h2>
+<h2>说明：</h2>
+<h2>在指定的一个key值后面追加一个值</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>Value</h2>
+<h2>返回值：</h2>
+<h2>追加完之后这个key值得长度。</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'value1');</pre>
+<pre>$redis-&gt;append('key', 'value2'); /* 12 */</pre>
+<pre>$redis-&gt;get('key'); /* 'value1value2' */</pre>
+</div>
+<h2>getRange&nbsp;(方法不存在)</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的string中start至end之间的字符</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start</h2>
+<h2>end</h2>
+<h2>返回值：</h2>
+<h2>截取之后的值</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'string value');</pre>
+<pre>$redis-&gt;getRange('key', 0, 5); /* 'string' */</pre>
+<pre>$redis-&gt;getRange('key', -5, -1); /* 'value' */</pre>
+</div>
+<p>&nbsp;</p>
+<h2>setRange</h2>
+<h2>说明：</h2>
+<h2>改变key的string中start至end之间的字符为value</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>offset</h2>
+<h2>value</h2>
+<h2>返回值：</h2>
+<h2>修改后字符的长度</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'Hello world');</pre>
+<pre>$redis-&gt;setRange('key', 6, "redis"); /* returns 11 */</pre>
+<pre>$redis-&gt;get('key'); /* "Hello redis" */</pre>
+</div>
+<h2>strlen</h2>
+<h2>说明：</h2>
+<h2>获得一个指定key的长度</h2>
+<h2>参数：</h2>
+<h2><em>key</em><em> </em><em></em></h2>
+<h2>返回值：</h2>
+<h2>长度</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', 'value');</pre>
+<pre>$redis-&gt;strlen('key'); /* 5 */</pre>
+</div>
+<h2>getBit</h2>
+<h2>说明：</h2>
+<h2>返回一个指定key的二进制信息</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>offset</h2>
+<h2>返回值：</h2>
+<h2>LONG</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', "\x7f"); // this is 0111 1111</pre>
+<pre>$redis-&gt;getBit('key', 0); /* 0 */</pre>
+<pre>$redis-&gt;getBit('key', 1); /* 1 */</pre>
+</div>
+<h2>setBit</h2>
+<h2>说明：</h2>
+<h2>给一个指定key的值得第offset位 赋值为value。</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>offset</h2>
+<h2>value: bool or int (1 or 0)</h2>
+<h2>返回值：</h2>
+<h2>LONG: 0 or 1</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;set('key', "*");&nbsp;&nbsp;&nbsp; // ord("*") = 42 = 0x2f = "0010 1010"</pre>
+<pre>$redis-&gt;setBit('key', 5, 1); /* returns 0 */</pre>
+<pre>$redis-&gt;setBit('key', 7, 1); /* returns 0 */</pre>
+<pre>$redis-&gt;get('key'); /* chr(0x2f) = "/" = b("0010 1111") */</pre>
+</div>
+<h2>flushDB</h2>
+<h2>说明：</h2>
+<h2>清空当前数据库</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>Bool:永远都返回true</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;flushDB();</pre>
+</div>
+<h2>flushAll</h2>
+<h2>说明：</h2>
+<h2>清空所有数据库</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>Bool:永远都返回true</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;flushAll();</pre>
+</div>
+<h2>sort</h2>
+<h2>说明：</h2>
+<h2>排序，分页等</h2>
+<h2>参数：</h2>
+<h2>'by' =&gt; 'some_pattern_*',</h2>
+<h2>'limit' =&gt; array(0, 1),</h2>
+<h2>'get' =&gt; 'some_other_pattern_*' or an array of patterns,</h2>
+<h2>'sort' =&gt; 'asc' or 'desc',</h2>
+<h2>'alpha' =&gt; TRUE,</h2>
+<h2>'store' =&gt; 'external-key'</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('s');</pre>
+<pre>$redis-&gt;sadd('s', 5);</pre>
+<pre>$redis-&gt;sadd('s', 4);</pre>
+<pre>$redis-&gt;sadd('s', 2);</pre>
+<pre>$redis-&gt;sadd('s', 1);</pre>
+<pre>$redis-&gt;sadd('s', 3);</pre>
+<pre>&nbsp;</pre>
+<pre>var_dump($redis-&gt;sort('s')); // 1,2,3,4,5</pre>
+<pre>var_dump($redis-&gt;sort('s', array('sort' =&gt; 'desc'))); // 5,4,3,2,1</pre>
+<pre>var_dump($redis-&gt;sort('s', array('sort' =&gt; 'desc', 'store' =&gt; 'out'))); // (int)5</pre>
+</div>
+<h2>info</h2>
+<h2>说明：</h2>
+<h2>返回redis的版本信息等详情</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2>&nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;info();</pre>
+</div>
+<h2>resetStat</h2>
+<h2>说明：</h2>
+<h2>重新统计输出INFO&nbsp;命令的结果</h2>
+<h2>参数：</h2>
+<h2>无</h2>
+<h2>返回值：</h2>
+<h2><em>BOOL</em><em> </em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;resetStat();</pre>
+</div>
+<h2>ttl</h2>
+<h2>说明：</h2>
+<h2>得到一个key的生存时间，如果这个key值不存在则返回false</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>返回值：</h2>
+<h2>Long or bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;ttl('key');</pre>
+</div>
+<h2>persist</h2>
+<h2>说明：</h2>
+<h2>移除生存时间到期的key</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>返回值：</h2>
+<h2>Bool 如果移除成功了返回true ，如果值不存在或是还在生存时间内则返回false</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;persist('key');</pre>
+</div>
+<h2>mset, msetnx</h2>
+<h2>说明：</h2>
+<h2>同时给多个key赋值 ，MSETNX&nbsp;只有当给所有的值都创建成功的时候才会返回true</h2>
+<h2>参数：</h2>
+<h2>array(key =&gt; value, ...)</h2>
+<h2>返回值：</h2>
+<h2>Bool &nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre><br>
+<br>
+</pre>
+<pre>$redis-&gt;mset(array('key0' =&gt; 'value0', 'key1' =&gt; 'value1'));</pre>
+<pre>var_dump($redis-&gt;get('key0'));</pre>
+<pre>var_dump($redis-&gt;get('key1'));</pre>
+<pre>&nbsp;</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>string(6) "value0"</pre>
+<pre>string(6) "value1"</pre>
+</div>
+<h2>rpoplpush （redis版本1.1以上才可以）</h2>
+<h2>说明：</h2>
+<h2>返回并删除名称为srckey的list的尾元素，并将该元素添加到名称为dstkey的list的头部</h2>
+<h2>参数：</h2>
+<h2>Key: srckey</h2>
+<h2>Key: dstkey</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('x', 'y');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;lPush('x', 'abc');</pre>
+<pre>$redis-&gt;lPush('x', 'def');</pre>
+<pre>$redis-&gt;lPush('y', '123');</pre>
+<pre>$redis-&gt;lPush('y', '456');</pre>
+<pre>&nbsp;</pre>
+<pre>// move the last of x to the front of y.</pre>
+<pre>var_dump($redis-&gt;rpoplpush('x', 'y'));</pre>
+<pre>var_dump($redis-&gt;lRange('x', 0, -1));</pre>
+<pre>var_dump($redis-&gt;lRange('y', 0, -1));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>string(3) "abc"</pre>
+<pre>array(1) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(3) "def"</pre>
+<pre>}</pre>
+<pre>array(3) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(3) "abc"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(3) "456"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(3) "123"</pre>
+<pre>}</pre>
+</div>
+<h2>brpoplpush</h2>
+<h2>说明：</h2>
+<h2>Rpoplpush命令的block版本。</h2>
+<h2>参数：</h2>
+<h2>Key: srckey</h2>
+<h2>Key: dstkey</h2>
+<h2>Long: timeout</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<h2>zAdd</h2>
+<h2>说明：</h2>
+<h2>向名称为key的zset中添加元素member，score用于排序。如果该元素已经存在，则根据score更新该元素的顺序。</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>score : double</h2>
+<h2>value: string</h2>
+<h2>返回值：</h2>
+<h2><em>Long</em>&nbsp; 元素被成功添加了返回1 否则返回0</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 1, 'val1');</pre>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 5, 'val5');</pre>
+<pre>$redis-&gt;zRange('key', 0, -1); // array(val0, val1, val5)</pre>
+</div>
+<h2>zRange</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的zset（元素已按score从小到大排序）中的index从start到end的所有元素</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: long</h2>
+<h2>end: long</h2>
+<h2>withscores: bool = false</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key1', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key1', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key1', 10, 'val10');</pre>
+<pre>$redis-&gt;zRange('key1', 0, -1); /* array('val0', 'val2', 'val10') */</pre>
+<pre>&nbsp;</pre>
+<pre>// with scores</pre>
+<pre>$redis-&gt;zRange('key1', 0, -1, true); /* array('val0' =&gt; 0, 'val2' =&gt; 2, 'val10' =&gt; 10) */</pre>
+</div>
+<h2>zDelete, zRem</h2>
+<h2>说明：</h2>
+<h2>删除名称为key的zset中的元素member</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>member</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em>&nbsp; 成功返回1 失败返回0</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zDelete('key', 'val2');</pre>
+<pre>$redis-&gt;zRange('key', 0, -1); /* array('val0', 'val10') */</pre>
+</div>
+<h2>zRevRange</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的zset（元素已按score从大到小排序）中的index从start到end的所有元素.withscores: 是否输出socre的值，默认false，不输出</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: long</h2>
+<h2>end: long</h2>
+<h2>withscores: bool = false</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zRevRange('key', 0, -1); /* array('val10', 'val2', 'val0') */</pre>
+<pre>&nbsp;</pre>
+<pre>// with scores</pre>
+<pre>$redis-&gt;zRevRange('key', 0, -1, true); /* array('val10' =&gt; 10, 'val2' =&gt; 2, 'val0' =&gt; 0) */</pre>
+</div>
+<h2>zRangeByScore, zRevRangeByScore</h2>
+<h2>说明：</h2>
+<h2>返回名称为key值中score &gt;= star且score &lt;= end的所有元素</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: string</h2>
+<h2>end: string</h2>
+<h2>options: array</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zRangeByScore('key', 0, 3); /* array('val0', 'val2') */</pre>
+<pre>$redis-&gt;zRangeByScore('key', 0, 3, array('withscores' =&gt; TRUE); /* array('val0' =&gt; 0, 'val2' =&gt; 2) */</pre>
+<pre>$redis-&gt;zRangeByScore('key', 0, 3, array('limit' =&gt; array(1, 1)); /* array('val2' =&gt; 2) */</pre>
+<pre>$redis-&gt;zRangeByScore('key', 0, 3, array('limit' =&gt; array(1, 1)); /* array('val2') */</pre>
+<pre>$redis-&gt;zRangeByScore('key', 0, 3, array('withscores' =&gt; TRUE, 'limit' =&gt; array(1, 1)); /* array('val2' =&gt; 2) */</pre>
+</div>
+<h2>zCount</h2>
+<h2>说明：</h2>
+<h2>返回名称为key值中score &gt;= star且score &lt;= end的所有元素的个数</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: string</h2>
+<h2>end: string</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em>&nbsp;返回相应结果的长度</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zCount('key', 0, 3); /* 2, corresponding to array('val0', 'val2') */</pre>
+</div>
+<h2>zRemRangeByScore, zDeleteRangeByScore</h2>
+<h2>说明：</h2>
+<h2>删除名称为key的值中score &gt;= star且score &lt;= end的所有元素，返回删除个数</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: double or "+inf" or "-inf" string</h2>
+<h2>end: double or "+inf" or "-inf" string</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em>&nbsp;删除的个数</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zRemRangeByScore('key', 0, 3); /* 2 */</pre>
+</div>
+<h2>zRemRangeByRank, zDeleteRangeByRank</h2>
+<h2>说明：</h2>
+<h2>移除有序集key中，指定排名(rank)区间内的所有成员。</h2>
+<h2>区间分别以下标参数start和stop指出，包含start和stop在内。</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>start: LONG</h2>
+<h2>end: LONG</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em>&nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 1, 'one');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'two');</pre>
+<pre>$redis-&gt;zAdd('key', 3, 'three');</pre>
+<pre>$redis-&gt;zRemRangeByRank('key', 0, 1); /* 2 */</pre>
+<pre>$redis-&gt;zRange('key', 0, -1, array('withscores' =&gt; TRUE)); /* array('three' =&gt; 3) */</pre>
+</div>
+<h2>zSize, zCard</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的值的所有元素的个数</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>返回值：</h2>
+<h2>Long</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('key', 10, 'val10');</pre>
+<pre>$redis-&gt;zSize('key'); /* 3 */</pre>
+</div>
+<h2>zScore</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的值中元素member的score</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>member</h2>
+<h2>返回值：</h2>
+<h2><em>Double</em></h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;zAdd('key', 2.5, 'val2');</pre>
+<pre>$redis-&gt;zScore('key', 'val2'); /* 2.5 */</pre>
+</div>
+<h2>zRank, zRevRank</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的值（元素已按score从小到大排序）中member 元素的rank（即index，从0开始），若没有member 元素，返回“null”。zRevRank 是从大到小排序</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>member</h2>
+<h2>返回值：</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('z');</pre>
+<pre>$redis-&gt;zAdd('key', 1, 'one');</pre>
+<pre>$redis-&gt;zAdd('key', 2, 'two');</pre>
+<pre>$redis-&gt;zRank('key', 'one'); /* 0 */</pre>
+<pre>$redis-&gt;zRank('key', 'two'); /* 1 */</pre>
+<pre>$redis-&gt;zRevRank('key', 'one'); /* 1 */</pre>
+<pre>$redis-&gt;zRevRank('key', 'two'); /* 0 */</pre>
+</div>
+<h2>zIncrBy</h2>
+<h2>说明：</h2>
+<h2>如果在名称为key的值中已经存在元素member，则该元素的score增加increment；否则向集合中添加该元素，其score的值为increment</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>value: (double) value that will be added to the member's score</h2>
+<h2>member</h2>
+<h2>返回值：</h2>
+<h2>DOUBLE &nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('key');</pre>
+<pre>$redis-&gt;zIncrBy('key', 2.5, 'member1'); /* key or member1 didn't exist, so member1's score is to 0 before the increment */</pre>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* and now has the value 2.5&nbsp; */</pre>
+<pre>$redis-&gt;zIncrBy('key', 1, 'member1'); /* 3.5 */</pre>
+</div>
+<h2>zUnion</h2>
+<h2>说明：</h2>
+<h2>对N个ZSetKeys求并集，并将最后的集合保存在dstkeyN中。对于集合中每一个元素的score，在进行AGGREGATE运算前，都
+要乘以对于的WEIGHT参数。如果没有提供WEIGHT，默认为1。默认的AGGREGATE是SUM，即结果集合中元素的score是所有集合对应元
+素进行SUM运算的值，而MIN和MAX是指，结果集合中元素的score是所有集合对应元素中最小值和最大值。</h2>
+<h2>参数：</h2>
+<h2>keyOutput</h2>
+<h2>arrayZSetKeys</h2>
+<h2>arrayWeights</h2>
+<h2>aggregateFunction Either "SUM", "MIN", or "MAX": defines the behaviour to use on duplicate entries during the zUnion.</h2>
+<h2>返回值：</h2>
+<h2>LONG &nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('k1');</pre>
+<pre>$redis-&gt;delete('k2');</pre>
+<pre>$redis-&gt;delete('k3');</pre>
+<pre>$redis-&gt;delete('ko1');</pre>
+<pre>$redis-&gt;delete('ko2');</pre>
+<pre>$redis-&gt;delete('ko3');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zAdd('k1', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('k1', 1, 'val1');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zAdd('k2', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('k2', 3, 'val3');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zUnion('ko1', array('k1', 'k2')); /* 4, 'ko1' =&gt; array('val0', 'val1', 'val2', 'val3') */</pre>
+<pre>&nbsp;</pre>
+<pre>/* Weighted zUnion */</pre>
+<pre>$redis-&gt;zUnion('ko2', array('k1', 'k2'), array(1, 1)); /* 4, 'ko1' =&gt; array('val0', 'val1', 'val2', 'val3') */</pre>
+<pre>$redis-&gt;zUnion('ko3', array('k1', 'k2'), array(5, 1)); /* 4, 'ko1' =&gt; array('val0', 'val2', 'val3', 'val1') */</pre>
+</div>
+<h2>zInter</h2>
+<h2>说明：</h2>
+<h2>对N个ZSetKeys求交集，并将最后的集合保存在dstkeyN中。对于集合中每一个元素的score，在进行AGGREGATE运算前，都
+要乘以对于的WEIGHT参数。如果没有提供WEIGHT，默认为1。默认的AGGREGATE是SUM，即结果集合中元素的score是所有集合对应元
+素进行SUM运算的值，而MIN和MAX是指，结果集合中元素的score是所有集合对应元素中最小值和最大值。</h2>
+<h2>参数：</h2>
+<h2>keyOutput</h2>
+<h2>arrayZSetKeys</h2>
+<h2>arrayWeights</h2>
+<h2>aggregateFunction Either "SUM", "MIN", or "MAX": defines the behaviour to use on duplicate entries during the zUnion.</h2>
+<h2>返回值：</h2>
+<h2>LONG &nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('k1');</pre>
+<pre>$redis-&gt;delete('k2');</pre>
+<pre>$redis-&gt;delete('k3');</pre>
+<pre>$redis-&gt;delete('ko1');</pre>
+<pre>$redis-&gt;delete('ko2');</pre>
+<pre>$redis-&gt;delete('ko3');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zAdd('k1', 0, 'val0');</pre>
+<pre>$redis-&gt;zAdd('k1', 1, 'val1');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zAdd('k2', 2, 'val2');</pre>
+<pre>$redis-&gt;zAdd('k2', 3, 'val3');</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;zUnion('ko1', array('k1', 'k2')); /* 4, 'ko1' =&gt; array('val0', 'val1', 'val2', 'val3') */</pre>
+<pre>&nbsp;</pre>
+<pre>/* Weighted zUnion */</pre>
+<pre>$redis-&gt;zUnion('ko2', array('k1', 'k2'), array(1, 1)); /* 4, 'ko1' =&gt; array('val0', 'val1', 'val2', 'val3') */</pre>
+<pre>$redis-&gt;zUnion('ko3', array('k1', 'k2'), array(5, 1)); /* 4, 'ko1' =&gt; array('val0', 'val2', 'val3', 'val1') */</pre>
+</div>
+<h2>hSet</h2>
+<h2>说明：</h2>
+<h2>向名称为key的hash中添加元素hashKey—&gt; value</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>hashKey</h2>
+<h2>value</h2>
+<h2>返回值：</h2>
+<h2>Long:如果这个值不存在并且被添加成功返回1，如果这个值存在并且被替代返回0，错误返回false</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h')</pre>
+<pre>$redis-&gt;hSet('h', 'key1', 'hello'); /* 1, 'key1' =&gt; 'hello' in the hash at "h" */</pre>
+<pre>$redis-&gt;hGet('h', 'key1'); /* returns "hello" */</pre>
+<pre>&nbsp;</pre>
+<pre>$redis-&gt;hSet('h', 'key1', 'plop'); /* 0, value was replaced. */</pre>
+<pre>$redis-&gt;hGet('h', 'key1'); /* returns "plop" */</pre>
+</div>
+<h2>hSetNx</h2>
+<h2>说明：</h2>
+<h2>向名称为key的hash中添加元素hashKey—&gt; value ，只当这个值不存在的时候生效。</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>hashKey</h2>
+<h2>value</h2>
+<h2>&nbsp;</h2>
+<h2>返回值：</h2>
+<h2>Bool</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h')</pre>
+<pre>$redis-&gt;hSetNx('h', 'key1', 'hello'); /* TRUE, 'key1' =&gt; 'hello' in the hash at "h" */</pre>
+<pre>$redis-&gt;hSetNx('h', 'key1', 'world'); /* FALSE, 'key1' =&gt; 'hello' in the hash at "h". No change since the field wasn't replaced.</pre>
+</div>
+<h2>hGet</h2>
+<h2>说明：</h2>
+<h2>返回指定名称为<em>key </em>的hash中<em>hashKey</em>对应的值</h2>
+<h2>参数：</h2>
+<h2><em>key</em><em><br> </em><em>hashKey</em><em> </em><em></em></h2>
+<h2>返回值：</h2>
+<h2>成功取到这个值则返回这个值，否则返回false</h2>
+<h2>范例：</h2>
+<h2>hLen</h2>
+<h2>说明：</h2>
+<h2>返回名称为key 的hash中元素个数</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em><em>&nbsp;</em>成功则返回hase中元素的个数，失败则返回false</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h')</pre>
+<pre>$redis-&gt;hSet('h', 'key1', 'hello');</pre>
+<pre>$redis-&gt;hSet('h', 'key2', 'plop');</pre>
+<pre>$redis-&gt;hLen('h'); /* returns 2 */</pre>
+</div>
+<h2>hDel</h2>
+<h2>说明：</h2>
+<h2>删除名称为key的hash中键为<em>hashKey</em>的域</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>hashKey</h2>
+<h2>返回值：</h2>
+<h2>bool</h2>
+<h2>范例：</h2>
+<h2>hKeys</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的hash中所有键值</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>返回值：</h2>
+<h2>Array 类似于php中的array_keys函数</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h');</pre>
+<pre>$redis-&gt;hSet('h', 'a', 'x');</pre>
+<pre>$redis-&gt;hSet('h', 'b', 'y');</pre>
+<pre>$redis-&gt;hSet('h', 'c', 'z');</pre>
+<pre>$redis-&gt;hSet('h', 'd', 't');</pre>
+<pre>var_dump($redis-&gt;hKeys('h'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>array(4) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "a"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "b"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(1) "c"</pre>
+<pre>&nbsp; [3]=&gt;</pre>
+<pre>&nbsp; string(1) "d"</pre>
+<pre>}</pre>
+</div>
+<h2>hVals</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的hash中所有值</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>返回值：</h2>
+<h2>Array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h');</pre>
+<pre>$redis-&gt;hSet('h', 'a', 'x');</pre>
+<pre>$redis-&gt;hSet('h', 'b', 'y');</pre>
+<pre>$redis-&gt;hSet('h', 'c', 'z');</pre>
+<pre>$redis-&gt;hSet('h', 'd', 't');</pre>
+<pre>var_dump($redis-&gt;hVals('h'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>array(4) {</pre>
+<pre>&nbsp; [0]=&gt;</pre>
+<pre>&nbsp; string(1) "x"</pre>
+<pre>&nbsp; [1]=&gt;</pre>
+<pre>&nbsp; string(1) "y"</pre>
+<pre>&nbsp; [2]=&gt;</pre>
+<pre>&nbsp; string(1) "z"</pre>
+<pre>&nbsp; [3]=&gt;</pre>
+<pre>&nbsp; string(1) "t"</pre>
+<pre>}</pre>
+</div>
+<h2>hGetAll</h2>
+<h2>说明：</h2>
+<h2>返回一个完整的hash</h2>
+<h2>参数：</h2>
+<h2><em>Key</em><em> </em><em></em></h2>
+<h2>返回值：</h2>
+<h2>array &nbsp;</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h');</pre>
+<pre>$redis-&gt;hSet('h', 'a', 'x');</pre>
+<pre>$redis-&gt;hSet('h', 'b', 'y');</pre>
+<pre>$redis-&gt;hSet('h', 'c', 'z');</pre>
+<pre>$redis-&gt;hSet('h', 'd', 't');</pre>
+<pre>var_dump($redis-&gt;hGetAll('h'));</pre>
+</div>
+<p>Output:</p>
+<div>
+<pre>array(4) {</pre>
+<pre>&nbsp; ["a"]=&gt;</pre>
+<pre>&nbsp; string(1) "x"</pre>
+<pre>&nbsp; ["b"]=&gt;</pre>
+<pre>&nbsp; string(1) "y"</pre>
+<pre>&nbsp; ["c"]=&gt;</pre>
+<pre>&nbsp; string(1) "z"</pre>
+<pre>&nbsp; ["d"]=&gt;</pre>
+<pre>&nbsp; string(1) "t"</pre>
+<pre>}</pre>
+</div>
+<h2>hExists</h2>
+<h2>说明：</h2>
+<h2>名称为key的hash中是否存在键名字为memberKey 的域</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>memberKey</h2>
+<h2>返回值：</h2>
+<h2>BOOL</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;hSet('h', 'a', 'x');</pre>
+<pre>$redis-&gt;hExists('h', 'a'); /*&nbsp; TRUE */</pre>
+<pre>$redis-&gt;hExists('h', 'NonExistingKey'); /* FALSE */</pre>
+</div>
+<h2>hIncrBy</h2>
+<h2>说明：</h2>
+<h2>将名称为key的hash中member的值增加value</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>member</h2>
+<h2>value: (integer) value that will be added to the member's value</h2>
+<h2>返回值：</h2>
+<h2><em>LONG</em>&nbsp; 返回这个新值</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h');</pre>
+<pre>$redis-&gt;hIncrBy('h', 'x', 2); /* returns 2: h[x] = 2 now. */</pre>
+<pre>$redis-&gt;hIncrBy('h', 'x', 1); /* h[x] ← 2 + 1. Returns 3 */</pre>
+</div>
+<h2>hMset</h2>
+<h2>说明：</h2>
+<h2>向名称为key的hash中批量添加元素</h2>
+<h2>参数：</h2>
+<h2>Key</h2>
+<h2>members: key → value array</h2>
+<h2>返回值：</h2>
+<h2>BOOL</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('user:1');</pre>
+<pre>$redis-&gt;hMset('user:1', array('name' =&gt; 'Joe', 'salary' =&gt; 2000));</pre>
+<pre>$redis-&gt;hIncrBy('user:1', 'salary', 100); // Joe earns 100 more now.</pre>
+</div>
+<h2>hMGet</h2>
+<h2>说明：</h2>
+<h2>返回名称为key的hash中member 数组中的值所对应的在hash中的value</h2>
+<h2>参数：</h2>
+<h2>key</h2>
+<h2>member:Keys Array</h2>
+<h2>返回值：</h2>
+<h2>array</h2>
+<h2>范例：</h2>
+<div>
+<pre>$redis-&gt;delete('h');</pre>
+<pre>$redis-&gt;hSet('h', 'field1', 'value1');</pre>
+<pre>$redis-&gt;hSet('h', 'field2', 'value2');</pre>
+<pre>$redis-&gt;hmGet('h', array('field1', 'field2')); /* returns array('field1' =&gt; 'value1', 'field2' =&gt; 'value2') */</pre>
+<pre><a title="原文链接" href="https://github.com/nicolasff/phpredis" target="_blank">原文地址</a></pre>
+<pre><a title="参考地址1" href="http://www.cnblogs.com/NONE/archive/2011/05/30/2062904.html" target="_blank">参考地址1</a></pre>
+<pre><a title="参考地址2" href="http://hi.baidu.com/%B4%AB%CB%B5%D6%D0%B5%C4%C8%CC%D5%DF%C3%A8/blog/item/c9ff4ac1898afa4fb219a8c7.html" target="_blank">参考地址2</a></pre>
+</div>
+<p>&nbsp;</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="blog_post_info"><div id="BlogPostCategory"></div>
+<div id="EntryTag">标签: <a href="http://www.cnblogs.com/youxu/tag/php%20Redis/">php Redis</a></div>
+<div id="green_channel">
+绿色通道：
+<a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(cb_entryId,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+<a id="green_channel_follow" onclick="c_follow();" href="javascript:void(0);">关注我</a>
+<a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a><a id="green_channel_contact" href="http://space.cnblogs.com/msg/send/%e6%b7%a1%e5%ae%9a%e7%9a%84502" target="_blank">与我联系</a>
+<a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+</div>
+<div id="digg_block">
+<div id="author_profile">
+<div id="author_profile_info" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/youxu/" target="_blank"><img src="%E7%BF%BB%E8%AF%91%E4%BA%86%E4%B8%8BRedis%E7%9A%84%E5%87%BD%E6%95%B0%20-%20%E6%B7%A1%E5%AE%9A%E7%9A%84502%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/sample_face.gif" class="author_avatar" alt=""></a>
+<div id="author_profile_detail" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/youxu/">淡定的502</a><br>
+<a href="http://home.cnblogs.com/u/youxu/followees">关注 - 2</a><br>
+<a href="http://home.cnblogs.com/u/youxu/followers">粉丝 - 0</a>
+</div>
+</div>
+<div class="clear"></div>
+<div id="author_profile_honor"></div>
+<div id="author_profile_follow">
+<a href="javascript:void(0);" onclick="c_follow();return false;">+加关注</a>
+</div>
+</div>
+<div id="div_digg">										
+	<div class="diggit" onclick="votePost(cb_entryId,'Digg')"> 
+		<span class="diggnum" id="digg_count">0</span>
+	</div>
+	<div class="buryit" onclick="votePost(cb_entryId,'Bury')"> 
+		<span class="burynum" id="bury_count">0</span>
+	</div>
+	<div class="clear"></div>	
+	<div class="diggword" id="digg_tips">
+    (请您对文章做出评价)
+    </div>	
+</div>
+</div></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/youxu/archive/2011/12/05/2276620.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/youxu/archive/2011/12/05/2276620.html" title="发布于2011-12-05 12:01">关于jQuery的Autocomplete插件的远程url取json数据的问题</a><br><a href="http://www.cnblogs.com/youxu/archive/2011/12/14/2287220.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/youxu/archive/2011/12/14/2287220.html" title="发布于2011-12-14 10:27">对jquery中的Simple jQuery Date-picker Plugin时间选择插件做了简单汉化处理</a><br></div>
+</div>
+
+
+		<p class="postfoot">
+			posted on <span id="post-date">2011-12-12 09:45</span> <a href="http://www.cnblogs.com/youxu/">淡定的502</a> 阅读(<span id="post_view_count">2311</span>) 评论(<span id="post_comment_count">0</span>)  <a href="http://i.cnblogs.com/EditPosts.aspx?postid=2284437" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(2284437);return false;">收藏</a>
+		</p>
+	</div>
+	<script type="text/javascript">var allowComments=true,isLogined=false,cb_blogId=103674,cb_entryId=2284437,cb_blogApp=currentBlogApp,cb_blogUserGuid='8cbc667e-f21e-e111-b422-842b2b196315',cb_entryCreatedDate='2011/12/12 9:45:00';loadViewCount(cb_entryId);</script>
+	
+	<a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="site_nav_under"><a href="http://www.cnblogs.com/" target="_blank" title="开发者的网上家园">博客园首页</a><a href="http://q.cnblogs.com/" target="_blank" title="程序员问答社区">博问</a><a href="http://news.cnblogs.com/" target="_blank" title="IT新闻">新闻</a><a href="http://home.cnblogs.com/ing/" target="_blank">闪存</a><a href="http://job.cnblogs.com/" target="_blank">程序员招聘</a><a href="http://kb.cnblogs.com/" target="_blank">知识库</a></div>
+<div id="opt_under_post"></div>
+<script type="text/javascript">
+    var enableGoogleAd = true;var googletag = googletag || {};googletag.cmd = googletag.cmd || [];
+    fixPostBodyFormat();
+</script>
+<div id="ad_under_post_holder">
+<script type="text/javascript">
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    (function () {
+        var gads = document.createElement('script');
+        gads.async = true;
+        gads.type = 'text/javascript';
+        var useSSL = 'https:' == document.location.protocol;
+        gads.src = (useSSL ? 'https:' : 'http:') +'//www.googletagservices.com/tag/js/gpt.js';
+        var node = document.getElementsByTagName('script')[0];
+        node.parentNode.insertBefore(gads, node);
+    })();
+</script>
+<script type="text/javascript">
+    try {
+        googletag.cmd.push(function () {
+            googletag.defineSlot('/1090369/cnblogs_blogpost_C1_sitehome', [300, 250], 'div-gpt-ad-1346480159711-0').addService(googletag.pubads());
+            googletag.defineSlot('/1090369/cnblogs_blogpost_C2_sitehome', [468, 60], 'div-gpt-ad-1346479110744-1').addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    } catch (e) { }
+</script>
+<div id="google_ad_c1" class="c_ad_block">
+    <div id="div-gpt-ad-1346480159711-0" style="width: 300px; height: 250px;">
+    <script type="text/javascript">
+    try{
+        googletag.cmd.push(function () { googletag.display('div-gpt-ad-1346480159711-0'); });
+    } catch (e) { }
+    </script>
+    <div style="border: 0pt none;" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__container__"><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom;" marginheight="0" marginwidth="0" scrolling="no" name="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0" frameborder="0" height="250" width="300"></iframe></div><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom; visibility: hidden; display: none;" marginheight="0" marginwidth="0" scrolling="no" name="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__hidden__" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__hidden__" frameborder="0" height="0" width="0"></iframe></div>
+</div>
+</div>
+<div id="blog_news_kb"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/210759/" target="_blank">黑莓与亚马逊达成应用授权协议</a><br> ·  <a href="http://news.cnblogs.com/n/210758/" target="_blank">Lab126：那个为亚马逊研发手机的神秘部门</a><br> ·  <a href="http://news.cnblogs.com/n/210755/" target="_blank">苏拉明能逆转成年老鼠的自闭症状</a><br> ·  <a href="http://news.cnblogs.com/n/210754/" target="_blank">马斯克：人工智能的发展或出现可怕后果</a><br> ·  <a href="http://news.cnblogs.com/n/210753/" target="_blank">安全厂商称FIFA恶意App超过375种</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/210744/" target="_blank">程序员自我提高的几点建议 很实诚</a><br> ·  <a href="http://kb.cnblogs.com/page/200253/" target="_blank">扁平和简约来袭</a><br> ·  <a href="http://kb.cnblogs.com/page/208616/" target="_blank">前端开发中使用”有限状态机“解决复杂的交互问题</a><br> ·  <a href="http://kb.cnblogs.com/page/210323/" target="_blank">开发团队的效率</a><br> ·  <a href="http://kb.cnblogs.com/page/209987/" target="_blank">存储系统的那些事</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+$(function () {
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    $.ajax({ url: 'http://counter.cnblogs.com/blog/post/' + cb_entryId, type: 'get', dataType: 'script', cache: true });
+});
+</script>
+<script type="text/javascript">    
+</script>
+</div>
+
+</div>
+
+<p id="footer">
+	Powered by: 
+	<br>
+	
+	<a id="Footer1_Hyperlink3" name="Hyperlink1" href="http://www.cnblogs.com/" style="font-family:Verdana;font-size:12px;">博客园</a>
+	<br>
+	Copyright © 淡定的502
+</p>
+
+
+
+<iframe style="display: none; width: 0px; height: 0px;" name="google_osd_static_frame" id="google_osd_static_frame_7315279620492"></iframe></body></html>
