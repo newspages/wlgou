@@ -1,0 +1,75 @@
+如果想实现网站伪静态可以有以下四种方法
+1.配置apache的httpd.conf文件
+打开httpd.conf文件找到：
+#LoadModule rewrite_module modules/mod_rewrite.so 去掉前面的#号
+找到:
+<Directory>
+    ...
+    AllowOverride None
+    ...
+</Directory>
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+<Directory "E:/wamp/apache/htdocs">
+    #
+    # Possible values for the Options directive are "None", "All",
+    # or any combination of:
+    #   Indexes Includes FollowSymLinks SymLinksifOwnerMatch ExecCGI MultiViews
+    #
+    # Note that "MultiViews" must be named *explicitly* --- "Options All"
+    # doesn't give it to you.
+    #
+    # The Options directive is both complicated and important.  Please see
+    # http://httpd.apache.org/docs/2.2/mod/core.html#options
+    # for more information.
+    #
+    Options Indexes FollowSymLinks
+
+    #
+    # AllowOverride controls what directives may be placed in .htaccess files.
+    # It can be "All", "None", or any combination of the keywords:
+    #   Options FileInfo AuthConfig Limit
+    #
+    AllowOverride All
+
+    #
+    # Controls who can get stuff from this server.
+    #
+    Order allow,deny
+    Allow from all
+
+</Directory>
+将AllowOverride后面的None改为All
+重启apache（如果不行可以试着将所有的AllowOverride后面的None都改为All在重启）
+
+配置好apache中的httpd.conf之后，接下来在需要做伪静态的站点根目录中（主机根目录或者虚拟主机根目录）创建一个.htaccess文件
+在.htaccess文件中写入重写规则就好了！
+如：
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks
+  RewriteEngine On
+
+#  RewriteCond %{REQUEST_FILENAME} !-d
+#  RewriteCond %{REQUEST_FILENAME} !-f
+#  RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
+  #一下这条规则是将前面“^([a-z]+).html$”这一部分替换成index.php
+  RewriteRule ^([a-z]+).html$ index.php
+  RewriteRule ^goods/([0-9]+).html$ index.php?app=goods&id=$1
+</IfModule>
+在浏览器输入网址http://localhost/adafnd.html 回车后页面将会跳转到index.php文件
+
+%{REQUEST_FILENAME} 请求的文件名
+!-f 不是文件或不存在
+!-d 不是目录或不存在
+[L] 这是最后一个匹配项，不再往下匹配
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
+
+上面这三句的前面两句是做判断，如果前面两句的判断都通过就执行第三句
