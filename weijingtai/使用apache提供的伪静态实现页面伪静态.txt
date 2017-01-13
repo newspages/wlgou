@@ -1,0 +1,86 @@
+打开apache的配置文件httpd.conf
+找到
+#LoadModule rewrite_module modules/mod_rewrite.so
+把前面#去掉。没有则添加，但必选独占一行，使apache支持 mod_rewrite 模块
+
+找到
+<Directory "D:/ApacheServer/web">
+    #
+    # Possible values for the Options directive are "None", "All",
+    # or any combination of:
+    #   Indexes Includes FollowSymLinks SymLinksifOwnerMatch ExecCGI MultiViews
+    #
+    # Note that "MultiViews" must be named *explicitly* --- "Options All"
+    # doesn't give it to you.
+    #
+    # The Options directive is both complicated and important.  Please see
+    # http://httpd.apache.org/docs/2.2/mod/core.html#options
+    # for more information.
+    #
+    Options Indexes FollowSymLinks
+
+    #
+    # AllowOverride controls what directives may be placed in .htaccess files.
+    # It can be "All", "None", or any combination of the keywords:
+    #   Options FileInfo AuthConfig Limit
+    #
+    AllowOverride None
+
+    #
+    # Controls who can get stuff from this server.
+    #
+    Order allow,deny
+    Allow from all
+
+</Directory>
+把
+AllowOverride None 换成 AllowOverride All 使apache支持 .htaccess 文件
+
+重启apache服务器
+
+在要启用伪静态的 PHP 项目根目录下建立 .htaccess 文件
+
+在 .htaccess 文件中输入内容
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteRule index.html$ index.php
+    RewriteRule index-([1-9]+[0-9]*).html$ index.php?p=$1
+    RewriteRule ([a-z]{1,})-([0-9]{1,}).html$ index.php?action=$1&id=$2
+</IfModule>
+
+注释:
+RewriteEngine   为重写引擎开关，on为开启，off为关闭。
+
+RewriteRule     是路由转向规则，$ 之前路径为浏览器中要输入路径，这里可以用正则表达式表达。$+空格 后路径为后台实际转向路径，
+转向后台实际路径时可以传参数，例子里的后台页面可以用$_GET['p']   $_GET['action']  $_GET['id'] 来接收
+$1 代表浏览器路径中输入的第一个正则表达式的值，以此类推，$2代表第二个正则表达式的值
+RewriteRule 路由转向规则里正则表达式用括号 () 括起来
+
+
+例子所在项目为test
+在项目下 index.php 页面内写入内容
+<?php
+if ($_GET ['p']) {
+    echo "p : " . $_GET ['p'];
+}
+
+if ($_GET ['action']) {
+    echo "action : " . $_GET ['action'];
+}
+
+if ($_GET ['id']) {
+    echo "id : " . $_GET ['id'];
+}
+?>
+
+在浏览器中输入
+http://localhost/test/index.html
+http://localhost/test/index-99.html
+http://localhost/test/page-18.html
+
+都会转向 http://localhost/test/index.php 页面
+并且依次
+http://localhost/test/index.html     页面什么都不显示
+http://localhost/test/index-99.html  页面显示 p : 99
+http://localhost/test/page-18.html   页面显示 action : pageid : 18
